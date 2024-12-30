@@ -1,0 +1,47 @@
+name: Deploy Power Apps Solution
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # GitHub runner using Ubuntu
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Set up Power Platform CLI (pac CLI)
+      - name: Set up Power Platform CLI
+        uses: microsoft/powerplatform-actions/setup@v1
+        with:
+          pac-version: 'latest'  # Install the latest version of Power Platform CLI
+
+      # Step 3: Authenticate to Power Platform
+      - name: Authenticate to Power Platform (Dev Environment)
+        uses: microsoft/powerplatform-actions/authenticate@v1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}  # GitHub secret for client ID
+          client-secret: ${{ secrets.CLIENT_SECRET }}  # GitHub secret for client secret
+          authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'  # Azure tenant ID
+          environment-url: 'https://<your-dev-environment-url>'  # Dev environment URL
+
+      # Step 4: Export Solution from Development Environment
+      - name: Export Solution from Development
+        run: pac solution export --name "YourSolutionName" --path "./solutions/solution.zip"
+
+      # Step 5: Authenticate to Production Environment
+      - name: Authenticate to Power Platform (Prod Environment)
+        uses: microsoft/powerplatform-actions/authenticate@v1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
+          authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'
+          environment-url: 'https://<your-prod-environment-url>'  # Prod environment URL
+
+      # Step 6: Import Solution to Production
+      - name: Import Solution to Production
+        run: pac solution import --path "./solutions/solution.zip" --overwrite-unmanaged  # Import solution to Prod
