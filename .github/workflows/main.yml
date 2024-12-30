@@ -1,0 +1,46 @@
+name: Deploy Power Apps Solution
+
+on:
+  push:
+    branches:
+      - main  # Trigger on push to the main branch
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest  # GitHub runner using Ubuntu
+
+    steps:
+      # Step 1: Checkout the repository
+      - name: Checkout Repository
+        uses: actions/checkout@v3
+
+      # Step 2: Install Power Platform CLI (pac CLI)
+      - name: Install Power Platform CLI
+        run: |
+          curl -sSL https://aka.ms/get-powerapps-cli | bash
+
+      # Step 3: Authenticate to Power Platform (Dev Environment)
+      - name: Authenticate to Power Platform (Dev Environment)
+        uses: microsoft/powerplatform-actions/authenticate@v1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}  # GitHub secret for client ID
+          client-secret: ${{ secrets.CLIENT_SECRET }}  # GitHub secret for client secret
+          authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'  # Azure tenant ID
+          environment-url: 'https://make.powerautomate.com/environments/3b81f68d-2b2a-e383-af3a-ddca5c02afd4'  # Dev environment URL
+
+      # Step 4: Export Solution from Development Environment
+      - name: Export Solution from Development
+        run: pac solution export --name "solution1testing" --path "./solutions/solution.zip"
+
+      # Step 5: Authenticate to Power Platform (Prod Environment)
+      - name: Authenticate to Power Platform (Prod Environment)
+        uses: microsoft/powerplatform-actions/authenticate@v1
+        with:
+          client-id: ${{ secrets.CLIENT_ID }}
+          client-secret: ${{ secrets.CLIENT_SECRET }}
+          authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'
+          environment-url: 'https://make.powerapps.com/environments/f3d358ea-b7df-ea8d-92b8-3a6ecf6b3dd8'  # Prod environment URL
+
+      # Step 6: Import Solution to Production
+      - name: Import Solution to Production
+        run: pac solution import --path "./solutions/solution.zip" --overwrite-unmanaged  # Import solution to Prod
