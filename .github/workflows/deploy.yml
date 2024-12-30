@@ -27,11 +27,11 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}  # GitHub secret for client ID
           client-secret: ${{ secrets.CLIENT_SECRET }}  # GitHub secret for client secret
           authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'  # Azure tenant ID
-          environment-url: 'https://<your-dev-environment-url>'  # Dev environment URL
+          environment-url: 'https://make.powerautomate.com/environments/3b81f68d-2b2a-e383-af3a-ddca5c02afd4>'  # Dev environment URL
 
       # Step 4: Export Solution from Development Environment
       - name: Export Solution from Development
-        run: pac solution export --name "YourSolutionName" --path "./solutions/solution.zip"
+        run: pac solution export --name "solution1testing" --path "./solutions/solution.zip"
 
       # Step 5: Authenticate to Production Environment
       - name: Authenticate to Power Platform (Prod Environment)
@@ -40,7 +40,7 @@ jobs:
           client-id: ${{ secrets.CLIENT_ID }}
           client-secret: ${{ secrets.CLIENT_SECRET }}
           authority-url: 'https://login.microsoftonline.com/${{ secrets.TENANT_ID }}'
-          environment-url: 'https://<your-prod-environment-url>'  # Prod environment URL
+          environment-url: 'https://make.powerapps.com/environments/f3d358ea-b7df-ea8d-92b8-3a6ecf6b3dd8'  # Prod environment URL
 
       # Step 6: Import Solution to Production
       - name: Import Solution to Production
